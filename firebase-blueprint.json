@@ -1,0 +1,224 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User public profile information in Jibino personal finance",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 254 },
+        "name": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "enum": ["head", "member"] },
+        "createdAt": { "type": "string", "maxLength": 50 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "email", "name", "role", "createdAt"]
+    },
+    "UserPrivateCredentials": {
+      "title": "UserPrivateCredentials",
+      "description": "Salted password hash and recovery code for user verification",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "salt": { "type": "string", "maxLength": 64 },
+        "passwordHash": { "type": "string", "maxLength": 128 },
+        "recoveryCode": { "type": "string", "maxLength": 32 },
+        "recoveryExpires": { "type": "string", "maxLength": 50 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["userId", "salt", "passwordHash"]
+    },
+    "Account": {
+      "title": "Account",
+      "description": "User bank account, credit card, or cash wallet",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "type": { "type": "string", "enum": ["card", "bank", "cash", "crypto", "gold", "foreign_currency"] },
+        "balance": { "type": "number" },
+        "accountNumber": { "type": "string", "maxLength": 50 },
+        "cardNumber": { "type": "string", "maxLength": 32 },
+        "bankName": { "type": "string", "maxLength": 60 },
+        "color": { "type": "string", "maxLength": 30 },
+        "isDefault": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 50 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "userId", "name", "type", "balance"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Financial income, expense, or transfer transaction",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "memberId": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "enum": ["income", "expense", "transfer"] },
+        "amount": { "type": "number" },
+        "categoryId": { "type": "string", "maxLength": 128 },
+        "accountId": { "type": "string", "maxLength": 128 },
+        "toAccountId": { "type": "string", "maxLength": 128 },
+        "jalaliDate": { "type": "string", "maxLength": 20 },
+        "date": { "type": "string", "maxLength": 30 },
+        "description": { "type": "string", "maxLength": 500 },
+        "receiptImage": { "type": "string", "maxLength": 2048 },
+        "createdAt": { "type": "string", "maxLength": 50 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "userId", "type", "amount", "accountId", "date", "jalaliDate"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Expense or income category definition",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "nameEn": { "type": "string", "maxLength": 100 },
+        "type": { "type": "string", "enum": ["income", "expense"] },
+        "icon": { "type": "string", "maxLength": 50 },
+        "color": { "type": "string", "maxLength": 30 },
+        "budgetLimit": { "type": "number" },
+        "isDefault": { "type": "boolean" }
+      },
+      "required": ["id", "userId", "name", "type", "icon", "color"]
+    },
+    "CheckItem": {
+      "title": "CheckItem",
+      "description": "Issued or received promissory bank check",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "enum": ["issued", "received"] },
+        "checkNumber": { "type": "string", "maxLength": 50 },
+        "bankName": { "type": "string", "maxLength": 60 },
+        "amount": { "type": "number" },
+        "dueDate": { "type": "string", "maxLength": 30 },
+        "jalaliDueDate": { "type": "string", "maxLength": 20 },
+        "recipientOrIssuer": { "type": "string", "maxLength": 100 },
+        "status": { "type": "string", "enum": ["pending", "cleared", "bounced"] },
+        "registeredDate": { "type": "string", "maxLength": 30 },
+        "description": { "type": "string", "maxLength": 500 }
+      },
+      "required": ["id", "userId", "type", "checkNumber", "amount", "dueDate", "recipientOrIssuer", "status"]
+    },
+    "LoanItem": {
+      "title": "LoanItem",
+      "description": "Personal or bank loan tracker with installments",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 100 },
+        "totalAmount": { "type": "number" },
+        "monthlyPayment": { "type": "number" },
+        "totalInstallments": { "type": "number" },
+        "remainingInstallments": { "type": "number" },
+        "paidInstallments": { "type": "number" },
+        "dueDateDay": { "type": "number" },
+        "accountId": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["id", "userId", "title", "totalAmount", "monthlyPayment", "totalInstallments"]
+    },
+    "DebtItem": {
+      "title": "DebtItem",
+      "description": "Borrowed or lent money with individuals",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "enum": ["debt", "credit"] },
+        "personName": { "type": "string", "maxLength": 100 },
+        "amount": { "type": "number" },
+        "dueDate": { "type": "string", "maxLength": 30 },
+        "jalaliDueDate": { "type": "string", "maxLength": 20 },
+        "description": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["pending", "cleared"] },
+        "phone": { "type": "string", "maxLength": 30 }
+      },
+      "required": ["id", "userId", "type", "personName", "amount", "dueDate", "status"]
+    },
+    "SavingGoal": {
+      "title": "SavingGoal",
+      "description": "Savings and financial target goal tracker",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 100 },
+        "targetAmount": { "type": "number" },
+        "currentAmount": { "type": "number" },
+        "deadline": { "type": "string", "maxLength": 30 },
+        "color": { "type": "string", "maxLength": 30 },
+        "category": { "type": "string", "maxLength": 60 },
+        "isCompleted": { "type": "boolean" }
+      },
+      "required": ["id", "userId", "title", "targetAmount", "currentAmount", "deadline"]
+    },
+    "FamilyMember": {
+      "title": "FamilyMember",
+      "description": "Family accounting profile member",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "enum": ["head", "spouse", "child", "member"] },
+        "avatar": { "type": "string", "maxLength": 50 },
+        "color": { "type": "string", "maxLength": 30 },
+        "monthlyAllowance": { "type": "number" },
+        "pinHash": { "type": "string", "maxLength": 128 },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "userId", "name", "role", "avatar", "color"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Stores user profile and account configuration"
+    },
+    "/users/{userId}/private/{credId}": {
+      "schema": "UserPrivateCredentials",
+      "description": "Stores user private credentials, salted hashes, and recovery tokens (strictly restricted)"
+    },
+    "/users/{userId}/accounts/{accountId}": {
+      "schema": "Account",
+      "description": "User bank accounts, cards, and wallets"
+    },
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "User financial transactions and expense records"
+    },
+    "/users/{userId}/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Custom and standard transaction categories"
+    },
+    "/users/{userId}/checks/{checkId}": {
+      "schema": "CheckItem",
+      "description": "Issued and received promissory bank checks"
+    },
+    "/users/{userId}/loans/{loanId}": {
+      "schema": "LoanItem",
+      "description": "Loans and installments schedule"
+    },
+    "/users/{userId}/debts/{debtId}": {
+      "schema": "DebtItem",
+      "description": "Debts and credits with individuals"
+    },
+    "/users/{userId}/goals/{goalId}": {
+      "schema": "SavingGoal",
+      "description": "User saving goals and milestone progress"
+    },
+    "/users/{userId}/familyMembers/{memberId}": {
+      "schema": "FamilyMember",
+      "description": "Family members for multi-user family finance"
+    }
+  }
+}

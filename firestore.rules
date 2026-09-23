@@ -1,0 +1,154 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Common security helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation helper for User Profile
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['id', 'email', 'name', 'role'])
+        && data.id is string && data.id.size() <= 128
+        && data.email is string && data.email.size() <= 254
+        && data.name is string && data.name.size() <= 100
+        && (data.role == 'head' || data.role == 'member');
+    }
+
+    // Validation helper for Private Credentials
+    function isValidCredentials(data) {
+      return data.keys().hasAll(['userId', 'salt', 'passwordHash'])
+        && data.userId is string && data.userId.size() <= 128
+        && data.salt is string && data.salt.size() <= 64
+        && data.passwordHash is string && data.passwordHash.size() <= 128;
+    }
+
+    // Validation helper for Account
+    function isValidAccount(data) {
+      return data.keys().hasAll(['id', 'userId', 'name', 'type', 'balance'])
+        && data.id is string && data.id.size() <= 128
+        && data.userId is string && data.userId.size() <= 128
+        && data.name is string && data.name.size() <= 100
+        && data.balance is number;
+    }
+
+    // Validation helper for Transaction
+    function isValidTransaction(data) {
+      return data.keys().hasAll(['id', 'userId', 'type', 'amount', 'accountId', 'date', 'jalaliDate'])
+        && data.id is string && data.id.size() <= 128
+        && data.userId is string && data.userId.size() <= 128
+        && (data.type == 'income' || data.type == 'expense' || data.type == 'transfer')
+        && data.amount is number
+        && data.accountId is string && data.accountId.size() <= 128
+        && data.date is string && data.date.size() <= 30
+        && data.jalaliDate is string && data.jalaliDate.size() <= 20;
+    }
+
+    // User document and personal data boundaries
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming());
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming())
+        && incoming().id == existing().id;
+      allow delete: if isOwner(userId);
+
+      // Private credentials document (PII & sensitive auth credentials)
+      match /private/{credId} {
+        allow get: if isOwner(userId) && isValidId(credId);
+        allow create, update: if isOwner(userId) && isValidId(credId) && isValidCredentials(incoming())
+          && incoming().userId == userId;
+        allow delete: if isOwner(userId) && isValidId(credId);
+      }
+
+      // Accounts subcollection
+      match /accounts/{accountId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(accountId) && isValidAccount(incoming())
+          && incoming().userId == userId;
+        allow update: if isOwner(userId) && isValidId(accountId) && isValidAccount(incoming())
+          && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(accountId);
+      }
+
+      // Transactions subcollection
+      match /transactions/{transactionId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(transactionId) && isValidTransaction(incoming())
+          && incoming().userId == userId;
+        allow update: if isOwner(userId) && isValidId(transactionId) && isValidTransaction(incoming())
+          && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(transactionId);
+      }
+
+      // Categories subcollection
+      match /categories/{categoryId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(categoryId) && incoming().userId == userId;
+        allow update: if isOwner(userId) && isValidId(categoryId) && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(categoryId);
+      }
+
+      // Checks subcollection
+      match /checks/{checkId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(checkId) && incoming().userId == userId;
+        allow update: if isOwner(userId) && isValidId(checkId) && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(checkId);
+      }
+
+      // Loans subcollection
+      match /loans/{loanId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(loanId) && incoming().userId == userId;
+        allow update: if isOwner(userId) && isValidId(loanId) && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(loanId);
+      }
+
+      // Debts subcollection
+      match /debts/{debtId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(debtId) && incoming().userId == userId;
+        allow update: if isOwner(userId) && isValidId(debtId) && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(debtId);
+      }
+
+      // Goals subcollection
+      match /goals/{goalId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(goalId) && incoming().userId == userId;
+        allow update: if isOwner(userId) && isValidId(goalId) && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(goalId);
+      }
+
+      // Family Members subcollection
+      match /familyMembers/{memberId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(memberId) && incoming().userId == userId;
+        allow update: if isOwner(userId) && isValidId(memberId) && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId) && isValidId(memberId);
+      }
+    }
+  }
+}

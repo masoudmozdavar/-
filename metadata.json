@@ -1,0 +1,6 @@
+{
+  "name": "جیبینو | سامانه هوشمند مالی خانواده",
+  "description": "سیستم جامع مدیریت هوشمند دارایی، دخل‌وخرج و تراز مالی خانواده با اعلان‌های لحظه‌ای، نظارت سرپرست و مقایسه مخارج اعضا",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
